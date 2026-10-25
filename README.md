@@ -1,20 +1,22 @@
 # Quota Grid
 
-Виджет KDE Plasma 6, который собирает лимиты локально установленных AI-инструментов и показывает их прямо в панели. Поддерживаются 5-часовые и недельные окна Claude Code и Codex, а также дневные и бонусные пакеты ZCode. Обновление идёт в фоне через `systemd --user`, поэтому цифры остаются актуальными, даже когда попап виджета закрыт. При старте нового окна лимита приходит системное уведомление KDE.
+Quota Grid показывает лимиты локально установленных AI-инструментов. Для KDE Plasma 6 есть нативный виджет в панели, а для остальных окружений — локальный веб-дашборд с тем же дизайном. Обновление идёт в фоне, поэтому цифры остаются актуальными, даже когда интерфейс закрыт. При старте нового окна лимита приходит системное уведомление.
 
-> Версия 1.0.0. Проект использует локальные сессии и неофициальные usage-endpoint'ы, поэтому поведение провайдеров может меняться без предупреждения.
+> Версия 1.1.0. Проект использует локальные сессии и неофициальные usage-endpoint'ы, поэтому поведение провайдеров может меняться без предупреждения.
 
 ## Возможности
 
-- Компактный индикатор в панели: капсула с фирменными значками инструментов и тонкими кольцами использования.
-- Попап-дашборд с карточками Claude Code, Codex и ZCode, шкалами, процентами и временем до сброса.
-- Для ZCode показываются реальные токен-пакеты по моделям, включая отдельные бонусные пакеты и срок их действия.
+- Панельный виджет KDE Plasma 6: компактная капсула с кольцами использования и попап-дашборд с карточками провайдеров.
+- Кросс-десктопный веб-дашборд: открывается в любом браузере на GNOME, XFCE, Cinnamon, MATE, LXQt, Budgie и других окружениях. Работает на X11 и Wayland.
+- Claude Code, Codex и ZCode: 5-часовые и недельные окна, а для ZCode — дневные лимиты и отдельные бонусные пакеты.
+- Обновление в фоне через `systemd --user` или XDG autostart.
+- Системные уведомления KDE/GNOME/XFCE через `notify-send` при сбросе окна.
 - Статусы `LIVE`, `LOW`, `LIMIT`, `AUTH`, `PAUSED`, `STALE`.
-- Кнопки обновления, открытия настроек и закрытия попапа.
-- Автообновление раз в 5 минут (интервал настраивается).
-- Уведомление при появлении нового окна лимита, даже если попап закрыт.
+- CLI и JSON-вывод для интеграций.
 
 ## Как это выглядит
+
+### KDE Plasma 6
 
 <p align="center">
   <img src="docs/screenshots/popup.png" width="444" alt="Попап Quota Grid с квотами Claude Code, Codex и ZCode">
@@ -28,27 +30,63 @@
 
 <p align="center"><sub>Подсказка компактного индикатора при наведении в панели Plasma.</sub></p>
 
+### Веб-дашборд для других рабочих столов
+
+<p align="center">
+  <img src="docs/screenshots/web-ui.png" width="480" alt="Веб-дашборд Quota Grid">
+</p>
+
+<p align="center"><sub>Локальный веб-дашборд с демо-данными. Запускается через ярлык Quota Grid или команду <code>quota-manager ui</code>.</sub></p>
+
 ## Совместимость
 
-Виджет рассчитан на **Linux с KDE Plasma 6**:
+| Окружение | Интерфейс | Статус |
+| --- | --- | --- |
+| KDE Plasma 6 на Wayland | виджет в панели + веб-дашборд | протестировано на Kubuntu 26.04, Plasma 6.6.6 |
+| KDE Plasma 6 на X11 | виджет в панели + веб-дашборд | виджет использует стандартные Plasma/QML API; отдельно на X11 не тестировался |
+| GNOME, XFCE, Cinnamon, MATE, LXQt, Budgie | веб-дашборд + уведомления | веб-интерфейс протестирован в Chrome на Kubuntu; другие окружения не тестировались |
+| Ubuntu 22.04+ / Debian 12+ | `.deb`: веб-дашборд, виджет при наличии Plasma 6 | пакет собирается из репозитория; проверьте установку на своей системе |
+| Плазма 5 | не поддерживается | для неё нужен отдельный порт |
 
-- протестирован на Kubuntu 26.04, KDE Plasma 6.6.6, Wayland, 1920×1200;
-- требуется Python 3.10+, `systemd --user` и `kpackagetool6`;
-- для ZCode нужен `python3-cryptography`;
-- для уведомлений нужен `notify-send` (пакет `libnotify-bin` в Debian/Ubuntu); без него остальная часть работает;
-- для задуманной типографики желательны шрифты IBM Plex Sans и IBM Plex Mono, но без них QML использует системный fallback.
+Требования:
 
-Ограничения совместимости:
+- Linux с Python 3.10+;
+- браузер и `xdg-utils` для веб-дашборда;
+- `notify-send` для системных уведомлений (пакет `libnotify-bin` в Debian/Ubuntu);
+- `python3-cryptography` для ZCode;
+- `systemd --user` желателен, но не обязателен: установщик из исходников умеет использовать XDG autostart;
+- для виджета — KDE Plasma 6 и `kpackagetool6`;
+- для задуманной типографики желательны шрифты IBM Plex Sans и IBM Plex Mono, но без них используется системный fallback.
 
-- это виджет Plasma, а не GNOME/XFCE/Cinnamon; для них нужен отдельный порт;
-- Plasma 5 не поддерживается;
-- X11 не тестировался (используются стандартные QML- и Plasma-API, но оформление попапа проверялось на Wayland);
-- интерфейс сейчас на русском языке;
-- нужна обычная пользовательская сессия systemd и установленные, авторизованные приложения провайдеров.
-
-На Fedora KDE, KDE neon, Arch и openSUSE с Plasma 6 должна работать та же связка, но эти дистрибутивы пока не тестировались. Названия пакетов с зависимостями отличаются; `install.sh` проверяет ключевые зависимости и подсказывает, чего не хватает.
+Интерфейс сейчас на русском языке. Проект не является расширением GNOME Shell: в GNOME квоты открываются как отдельное приложение/вкладка браузера, а уведомления приходят системные.
 
 ## Установка
+
+### Ubuntu / Debian: готовый `.deb`
+
+Скачайте `quota-grid_1.1.0_all.deb` из [GitHub Releases](https://github.com/dengabrielyan/quota-grid/releases) и установите:
+
+```bash
+sudo apt install ./quota-grid_1.1.0_all.deb
+```
+
+`apt` сам подтянет зависимости. Пакет не подписан и не входит в официальные репозитории Ubuntu/Debian — это сборка из GitHub Releases. После установки:
+
+- в меню приложений появится **Quota Grid** — откройте веб-дашборд;
+- на KDE Plasma 6 виджет можно добавить через стандартный выбор виджетов;
+- фоновый сборщик запускается при следующем входе через XDG autostart; до перезахода можно выполнить `quota-manager refresh` вручную.
+
+Пакет устанавливает и веб-интерфейс, и Plasma-виджет. Автозапуск можно отключить в системных настройках автозапуска рабочего стола.
+
+### Любой Linux: из исходников
+
+Зависимости для Debian/Ubuntu:
+
+```bash
+sudo apt install python3 python3-cryptography libnotify-bin xdg-utils fonts-ibm-plex
+```
+
+Для Fedora/Arch/openSUSE имена пакетов отличаются; нужны Python 3.10+, cryptography, libnotify/notify-send, xdg-utils и, при желании, шрифты IBM Plex. Установщик проверит ключевые зависимости и подскажет, чего не хватает.
 
 ```bash
 git clone https://github.com/dengabrielyan/quota-grid.git
@@ -56,27 +94,39 @@ cd quota-grid
 ./install.sh
 ```
 
-Для Kubuntu/Ubuntu зависимости ставятся так:
+Установщик сам определяет окружение:
+
+- если найден KDE Plasma 6 — устанавливает виджет;
+- если Plasma нет — оставляет только веб-дашборд и ярлык приложения;
+- если доступен `systemd --user` — ставит фоновый сервис;
+- иначе создаёт XDG autostart для демона.
+
+Дополнительные параметры:
 
 ```bash
-sudo apt install python3 python3-cryptography libnotify-bin kpackagetool6 fonts-ibm-plex
+./install.sh --add-to-panel   # сразу добавить виджет в панель Plasma
+./install.sh --no-service     # не запускать фоновый сборщик
 ```
 
-Затем добавьте виджет через стандартный выбор виджетов Plasma или выполните:
-
-```bash
-./install.sh --add-to-panel
-```
-
-Скрипт устанавливает всё в домашний каталог пользователя и не требует `sudo`:
+Установка идёт в домашний каталог пользователя и не требует `sudo`:
 
 - `~/.local/lib/quota-manager` — backend;
 - `~/.local/bin/quota-manager` — CLI;
-- `~/.local/share/plasma/plasmoids/org.kde.quota-grid` — виджет;
-- `~/.config/systemd/user/quota-manager.service` — фоновый сервис;
-- `~/.local/share/icons/hicolor/scalable/apps/quota-grid.svg` — иконка.
+- `~/.local/share/applications/quota-grid.desktop` — ярлык **Quota Grid**;
+- `~/.local/share/plasma/plasmoids/org.kde.quota-grid` — виджет (если есть Plasma);
+- `~/.local/share/icons/hicolor/scalable/apps/quota-grid.svg` — иконка;
+- systemd-сервис или XDG autostart — фоновое обновление.
 
-Если сервис не нужен, используйте `./install.sh --no-service`: виджет продолжит обновлять данные при открытии попапа, но фоновых уведомлений не будет.
+## Запуск
+
+В меню приложений выберите **Quota Grid**. Откроется локальный веб-дашборд; он работает, пока открыта вкладка, и останавливается через 5 минут без запросов. Если браузер не открылся автоматически:
+
+```bash
+quota-manager ui
+quota-manager ui --no-browser --port 8765
+```
+
+Веб-сервер слушает только `127.0.0.1` и использует случайный порт и одноразовый токен. Данные не доступны из локальной сети.
 
 ## Провайдеры
 
@@ -96,33 +146,33 @@ claude auth login
 
 Для Codex при истечении сессии выполните `codex login`; для ZCode — войдите в приложение заново. В интерфейсе такие состояния показываются как `AUTH`.
 
-## Использование
+## CLI
 
 ```bash
 quota-manager status          # таблица из кэша, без сети
-quota-manager status --json   # JSON (используется виджетом)
+quota-manager status --json   # JSON (используется интерфейсами)
 quota-manager refresh         # опросить все источники сейчас
 quota-manager refresh --json  # JSON после обновления
+quota-manager ui              # локальный веб-дашборд
 quota-manager doctor          # диагностика источников и зависимостей
 quota-manager notify-test     # проверить системные уведомления
 quota-manager settings        # создать и открыть config.json
+quota-manager daemon          # фоновый сборщик
 systemctl --user status quota-manager
 journalctl --user -u quota-manager -f
 ```
 
-Кнопка обновления в попапе также запускает `refresh`. Обычно её не нужно нажимать: сервис обновляет данные автоматически.
+Кнопка **Обновить** в веб-дашборде запускает `refresh`. Обычно обновление идёт автоматически раз в 5 минут.
 
 ## Уведомления
 
-После установки сервис уже работает. При появлении нового окна лимита он отправляет одно системное уведомление на инструмент, даже если попап виджета закрыт. Первый запуск только запоминает текущие окна и не создаёт ложных уведомлений.
-
-Проверить системные уведомления:
+Фоновый сборщик отправляет одно системное уведомление, когда появляется новое окно лимита. Первый запуск только запоминает текущие окна и не создаёт ложных уведомлений. Проверка:
 
 ```bash
 quota-manager notify-test
 ```
 
-KDE показывает такие уведомления как всплывающие окна и сохраняет их в истории в зависимости от настроек «Уведомлений» системы.
+В KDE и других окружениях уведомления зависят от системного демона уведомлений и наличия `notify-send`. Для установки из исходников используется `systemd --user`, а при его отсутствии — XDG autostart. В `.deb` используется XDG autostart для всех пользователей.
 
 ## Конфигурация
 
@@ -135,49 +185,72 @@ KDE показывает такие уведомления как всплыва
 }
 ```
 
-Интервал ограничен диапазоном 60–3600 секунд. После изменения интервала перезапустите сервис:
+Интервал ограничен диапазоном 60–3600 секунд. После изменения интервала перезапустите фоновый сборщик:
 
 ```bash
 systemctl --user restart quota-manager
 ```
 
-## Приватность
+## Приватность и безопасность
 
-Данные не отправляются в сторонние сервисы. Приложение не содержит телеметрии. OAuth-токены никогда не попадают в кэш, журналы или вызовы виджета. Кэш и состояние имеют права `0600`, каталоги — `0700`.
+Данные не отправляются в сторонние сервисы. Приложение не содержит телеметрии. OAuth-токены никогда не попадают в кэш, журналы или вызовы интерфейсов. Кэш и состояние имеют права `0600`, каталоги — `0700`.
 
-В кэше хранятся только нормализованные значения квот, статусы и время сброса. Сообщения об ошибках проходят редактирование секретов перед записью в журнал.
+Веб-дашборд:
+
+- слушает только `127.0.0.1`;
+- проверяет заголовок `Host`, чтобы исключить DNS-rebinding;
+- требует случайный токен для всех API-запросов;
+- отдаёт статические файлы по белому списку и использует CSP;
+- не принимает запросы с других сайтов.
+
+Сообщения об ошибках проходят редактирование секретов перед записью в журнал. Запись настроек и запуск обновления из веб-интерфейса защищены тем же локальным токеном.
 
 ## Ограничения
 
 - Anthropic и ZCode не публикуют контракты именно этих usage-endpoint'ов; при изменениях на стороне сервисов провайдер может временно показывать `ERROR`.
 - Codex app-server помечен как экспериментальный самим Codex CLI.
-- ZCode поддерживает активный провайдер `z.ai`; корпоративные конфигурации bigmodel могут отличаться. У текущего тарифа Start Plan нет 5-часового или недельного окна, поэтому виджет честно показывает дневные лимиты и бонусные пакеты, а не выдумывает недоступные значения.
+- ZCode поддерживает активный провайдер `z.ai`; корпоративные конфигурации bigmodel могут отличаться. У текущего тарифа Start Plan нет 5-часового или недельного окна, поэтому виджет честно показывает дневные лимиты и бонусные пакеты.
 - OpenCode, Gemini CLI и другие инструменты не добавлены, пока у них нет доступного локального источника квот.
-- Оформление попапа (без системной рамки, отступ 24 px от края) проверено на Plasma 6.6. На других версиях Plasma рамка может выглядеть иначе; функциональность виджета от этого не зависит.
+- GNOME Shell не имеет нативного верхнего индикатора: используется веб-дашборд и системные уведомления. Для верхней панели GNOME потребуется отдельное расширение.
+- Оформление попапа Plasma (без системной рамки, отступ 24 px от края) проверено на Plasma 6.6. На других версиях Plasma рамка может выглядеть иначе; функциональность от этого не зависит.
+- `.deb` не входит в официальные репозитории и не подписан; это артефакт GitHub Releases.
 
 ## Удаление
+
+Для установки из исходников:
 
 ```bash
 ./uninstall.sh          # удалить приложение, сохранить кэш
 ./uninstall.sh --purge  # удалить всё, включая кэш
 ```
 
+Для `.deb`:
+
+```bash
+sudo apt remove quota-grid
+```
+
 ## Разработка
 
 ```bash
 python3 -m unittest discover -s tests -v
+./packaging/build-deb.sh
 ```
 
-Тесты не обращаются к сети и не требуют реальных токенов. Они проверяют парсинг окон, выбор дневных и бонусных пакетов ZCode, редактирование секретов и детектор сбросов.
+19 тестов не обращаются к сети и не требуют реальных токенов. Они проверяют парсинг окон, выбор дневных и бонусных пакетов ZCode, редактирование секретов, детектор сбросов, локальный веб-сервер и защиту API.
 
 ```text
-quota_manager/                 Python backend и провайдеры
+quota_manager/                 Python backend, провайдеры и локальный веб-сервер
+quota_manager/webui/           HTML/CSS/JS веб-дашборда
 plasma/org.kde.quota-grid/     Plasma 6 plasmoid (QML)
-docs/screenshots/              скриншоты интерфейса
+docs/screenshots/              скриншоты интерфейсов
+packaging/build-deb.sh         сборка .deb без sudo
 systemd/                       user service
-tests/                         unit-тесты парсинга и детектора сбросов
+tests/                         unit-тесты backend и веб-сервера
 install.sh / uninstall.sh      установка в домашний каталог
 ```
+
+Сборка `.deb` требует `dpkg-deb` (пакет `dpkg-dev` в Debian/Ubuntu). Результат появляется в `dist/`.
 
 ## Логотипы
 
@@ -185,7 +258,7 @@ install.sh / uninstall.sh      установка в домашний катал
 
 ## English summary
 
-Quota Grid is a KDE Plasma 6 panel widget that displays usage limits from locally installed AI coding tools (Claude Code, Codex, ZCode). It reads existing local sessions, refreshes quotas through a `systemd --user` service, and sends KDE notifications when a limit window resets. Requirements: Linux, KDE Plasma 6, Python 3.10+, `python3-cryptography` for ZCode, and authorized provider CLIs/apps. The UI is currently in Russian. Tested on Kubuntu 26.04 with Plasma 6.6.6 on Wayland; other Plasma 6 distributions should work but are not yet tested. Install with `./install.sh`, then add the widget to a panel. This is not a GNOME/XFCE widget and does not support Plasma 5.
+Quota Grid shows AI coding-tool limits from locally installed sessions of Claude Code, Codex and ZCode. On KDE Plasma 6 it provides a native panel widget; on other Linux desktops it provides a local web dashboard that works on X11 and Wayland. A user service or XDG autostart refreshes quotas in the background, and desktop notifications announce reset limit windows. Requirements: Linux, Python 3.10+, a browser for the cross-desktop UI, and authorized provider apps; `python3-cryptography` is needed for ZCode. The UI is currently in Russian. Tested on Kubuntu 26.04 with Plasma 6.6.6 on Wayland. Build a Debian package with `./packaging/build-deb.sh`, or install from source with `./install.sh`.
 
 ## Лицензия
 

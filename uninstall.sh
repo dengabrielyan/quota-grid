@@ -29,8 +29,10 @@ if command -v kpackagetool6 >/dev/null 2>&1; then
     kpackagetool6 --type Plasma/Applet --remove "${APP_ID}" 2>/dev/null || true
 fi
 
+rm -f "${DATA_HOME}/applications/quota-grid.desktop"
+rm -f "${CONFIG_HOME}/autostart/quota-grid-daemon.desktop"
 rm -rf "${HOME}/.local/lib/quota-manager"
-rm -f "${HOME}/.local/bin/quota-manager"
+rm -f "${HOME}/.local/bin/quota-manager" "${HOME}/.local/bin/quota-grid"
 rm -f "${DATA_HOME}/icons/hicolor/scalable/apps/quota-grid.svg"
 
 if [[ "${PURGE}" -eq 1 ]]; then

@@ -3,10 +3,8 @@ from __future__ import annotations
 import argparse
 import json
 import shutil
-import subprocess
 import sys
 import time
-from pathlib import Path
 from typing import Any
 
 from . import APP_NAME, __version__
@@ -18,7 +16,8 @@ from .providers.claude import claude_config_dir
 from .providers.codex import _find_codex_binary, codex_home
 from .providers.zcode import _credentials_path as zcode_credentials_path
 from .providers.zcode import detect_app_version
-from .util import atomic_write_json, config_dir, data_dir, load_config, read_json
+from .settings import open_settings_file
+from .util import data_dir, load_config, read_json
 
 
 def _format_delta(seconds: int) -> str:
@@ -138,31 +137,9 @@ def _doctor() -> int:
 
 
 def _open_settings() -> int:
-    path = config_dir() / "config.json"
-    if not path.exists():
-        atomic_write_json(
-            path,
-            {
-                "refresh_interval_seconds": 300,
-                "notifications": True,
-            },
-        )
-    opener = shutil.which("xdg-open")
-    if not opener:
-        print(path)
-        return 0
-    try:
-        subprocess.Popen(
-            [opener, str(path)],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            start_new_session=True,
-        )
-    except OSError:
-        print(path)
-        return 1
+    code, path = open_settings_file()
     print(path)
-    return 0
+    return code
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -179,6 +156,11 @@ def _build_parser() -> argparse.ArgumentParser:
     refresh_parser.add_argument("--force", action="store_true", help="ignore retry cooldowns")
 
     subparsers.add_parser("daemon", help="run the background collector")
+
+    ui_parser = subparsers.add_parser("ui", help="run the cross-desktop web dashboard")
+    ui_parser.add_argument("--port", type=int, default=0, help="local port (0 chooses a free port)")
+    ui_parser.add_argument("--no-browser", action="store_true", help="do not open a browser")
+
     subparsers.add_parser("doctor", help="show provider and dependency diagnostics")
     subparsers.add_parser("notify-test", help="send a test system notification")
     subparsers.add_parser("settings", help="create and open the config file")
@@ -202,6 +184,13 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if command == "daemon":
             return run_daemon()
+        if command == "ui":
+            from .web import serve_ui
+
+            return serve_ui(
+                port=int(getattr(args, "port", 0) or 0),
+                open_browser=not bool(getattr(args, "no_browser", False)),
+            )
         if command == "doctor":
             return _doctor()
         if command == "notify-test":
