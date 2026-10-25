@@ -1,0 +1,21 @@
+[Unit]
+Description=Quota Grid - AI quota collector
+Documentation=https://github.com/dengabrielyan/quota-grid
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/quota-manager daemon
+Restart=on-failure
+RestartSec=20
+Environment=PYTHONUNBUFFERED=1
+SyslogIdentifier=quota-manager
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=-%h/.local/share/quota-manager -%h/.local/state/quota-manager -%h/.config/quota-manager -%h/.claude -%h/.codex
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,22 @@
+{
+  "KPackageStructure": "Plasma/Applet",
+  "KPlugin": {
+    "Id": "org.kde.quota-grid",
+    "Name": "Quota Grid",
+    "Name[ru]": "Quota Grid",
+    "Description": "5-hour and weekly limits from local Claude Code, Codex and ZCode sessions",
+    "Description[ru]": "Пятичасовые, недельные и дневные лимиты из локальных сессий Claude Code, Codex и ZCode",
+    "Icon": "quota-grid",
+    "Category": "System Information",
+    "License": "MIT",
+    "Version": "1.0.0",
+    "EnabledByDefault": false,
+    "Authors": [
+      {
+        "Name": "Daniel Gabrielyan"
+      }
+    ]
+  },
+  "X-Plasma-API-Minimum-Version": "6.0",
+  "X-Plasma-MainScript": "ui/main.qml"
+}
