@@ -14,6 +14,20 @@
 - Автообновление раз в 5 минут (интервал настраивается).
 - Уведомление при появлении нового окна лимита, даже если попап закрыт.
 
+## Как это выглядит
+
+<p align="center">
+  <img src="docs/screenshots/popup.png" width="444" alt="Попап Quota Grid с квотами Claude Code, Codex и ZCode">
+</p>
+
+<p align="center"><sub>Попап: карточки провайдеров, проценты, время сброса и отдельные бонусные пакеты ZCode.</sub></p>
+
+<p align="center">
+  <img src="docs/screenshots/tooltip.png" width="350" alt="Подсказка Quota Grid в панели KDE Plasma">
+</p>
+
+<p align="center"><sub>Подсказка компактного индикатора при наведении в панели Plasma.</sub></p>
+
 ## Совместимость
 
 Виджет рассчитан на **Linux с KDE Plasma 6**:
@@ -159,6 +173,7 @@ python3 -m unittest discover -s tests -v
 ```text
 quota_manager/                 Python backend и провайдеры
 plasma/org.kde.quota-grid/     Plasma 6 plasmoid (QML)
+docs/screenshots/              скриншоты интерфейса
 systemd/                       user service
 tests/                         unit-тесты парсинга и детектора сбросов
 install.sh / uninstall.sh      установка в домашний каталог
